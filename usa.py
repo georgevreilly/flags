@@ -17,31 +17,33 @@ def star_inner_radius(diameter: float = 1.0) -> float:
     return star_outer_radius(diameter) * math.sin(math.radians(18)) / math.sin(math.radians(54))
 
 
-def star_polygon(diameter: float = 1.0) -> List[Tuple[float, float]]:
+def star_polygon(diameter: float = 1.0, cx: float = 0.0, cy: float = 0.0) -> List[Tuple[float, float]]:
     start_angle = 90
     outer_radius = star_outer_radius(diameter)
     inner_radius = star_inner_radius(diameter)
     points = []
 
-    for i in range(1, 11):
+    for i in range(10):
         radius = inner_radius if i & 1 else outer_radius
         angle = (36 * i + start_angle) % 360
         rad = math.radians(angle)
-        x, y = (radius * math.cos(rad), radius * math.sin(rad))
+        x, y = (cx + radius * math.cos(rad), cy + radius * math.sin(rad))
         points.append((x, y))
 
     return points
 
 
 def draw_star(
-        diameter=1.0,
-        fill_polygon=True,
-        image_width=500,
-        multiplier=2,
-        line_width=0,
-        quarters=True,
-        filename="stars.png",
-        background_color="#F5E1D2",
+        diameter: float = 1.0,
+        cx: float = 0.0,
+        cy: float = 0.0,
+        fill_polygon: bool = True,
+        image_width: int = 500,
+        multiplier: int = 2,
+        line_width: int = 0,
+        quarters: bool = True,
+        filename: str = "stars.png",
+        background_color: str = "#F5E1D2",
     ):
     image_width *= multiplier
     image_height = image_width
@@ -49,8 +51,8 @@ def draw_star(
     star_radius = 2.0 * CX * 0.95
 
     def pt(x, y):
-        assert -0.5 <= x <= +0.5
-        assert -0.5 <= y <= +0.5
+        assert -0.5 <= x - cx <= +0.5
+        assert -0.5 <= y - cy <= +0.5
         px = round(CX + star_radius * x)
         py = round(CY - star_radius * y) # subtract because image origin is at top-left
         return (px, py)
@@ -63,7 +65,7 @@ def draw_star(
 
     outer_radius = star_outer_radius(diameter)
     inner_radius = star_inner_radius(diameter)
-    points = star_polygon(diameter)
+    points = star_polygon(diameter, cx, cy)
 
     if fill_polygon:
         polygon = [pt(x, y) for x,y in points]
