@@ -9,14 +9,19 @@ from PIL import Image, ImageDraw  # type: ignore
 import math
 import os
 
-def star_inner_radius(outer_radius: float = 0.5) -> float:
-    return outer_radius * math.sin(math.radians(18)) / math.sin(math.radians(54))
+def star_outer_radius(diameter: float = 1.0) -> float:
+    return (diameter / 2)
 
 
-def star_polygon(outer_radius: float = 0.5) -> List[Tuple[float, float]]:
+def star_inner_radius(diameter: float = 1.0) -> float:
+    return star_outer_radius(diameter) * math.sin(math.radians(18)) / math.sin(math.radians(54))
+
+
+def star_polygon(diameter: float = 1.0) -> List[Tuple[float, float]]:
     start_angle = 90
-    inner_radius = star_inner_radius(outer_radius)
-    points = [(0.0, outer_radius)]
+    outer_radius = star_outer_radius(diameter)
+    inner_radius = star_inner_radius(diameter)
+    points = []
 
     for i in range(1, 11):
         radius = inner_radius if i & 1 else outer_radius
@@ -28,44 +33,62 @@ def star_polygon(outer_radius: float = 0.5) -> List[Tuple[float, float]]:
     return points
 
 
-def draw_star(width=500, multiplier=2, line_width=0, separate_edges=True, quarters=True, diameter=1.0):
-    width *= multiplier
-    height = width
-    CX = CY = int(width / 2)
+def draw_star(
+        diameter=1.0,
+        fill_polygon=True,
+        image_width=500,
+        multiplier=2,
+        line_width=0,
+        quarters=True,
+        filename="stars.png",
+        background_color="#F5E1D2",
+    ):
+    image_width *= multiplier
+    image_height = image_width
+    CX = CY = int(image_width / 2)
     star_radius = 2.0 * CX * 0.95
 
     def pt(x, y):
-        return (round(CX + star_radius * x), round(CY - star_radius * y))
+        assert -0.5 <= x <= +0.5
+        assert -0.5 <= y <= +0.5
+        px = round(CX + star_radius * x)
+        py = round(CY - star_radius * y) # subtract because image origin is at top-left
+        return (px, py)
 
-    im = Image.new("RGB", (width, height), "#F5E1D2")
+    im = Image.new("RGB", (image_width, image_height), color=background_color)
     draw = ImageDraw.Draw(im)
 
-    colors = ["red", "green", "blue", "black", "yellowgreen", "cyan", "magenta",
-              "orange", "gray", "maroon", "indigo", "teal",]
+    colors = ["Red", "Green", "Blue", "Black", "YellowGreen", "Cyan", "Magenta",
+              "Orange", "Gray", "Maroon", "Indigo", "Teal",]
 
-    outer_radius = diameter / 2
-    inner_radius = star_inner_radius(outer_radius)
+    outer_radius = star_outer_radius(diameter)
+    inner_radius = star_inner_radius(diameter)
+    points = star_polygon(diameter)
 
-    if separate_edges:
-        px = py = None
-        for i, (x, y) in enumerate(star_polygon()):
-            sx, sy = pt(x, y)
-            print(f"i={i:2}, x={x:6.3f}, y={y:6.3f}, sx={sx:3}, sy={sy:3}, c={colors[i]}")
-            if px is not None:
-                draw.line([px, py, sx, sy], width=line_width, fill=colors[i])
-            px, py = (sx, sy)
-    else:
-        polygon = [pt(x, y) for x,y in star_polygon()[1:]]
+    if fill_polygon:
+        polygon = [pt(x, y) for x,y in points]
+        draw.polygon(polygon, outline="Red", fill="White")
         print(polygon)
-        draw.polygon(polygon, outline="black", fill="white")
+    else:
+        for i, (x, y) in enumerate(points):
+            sx, sy = pt(x, y)
+            p = i - 1 if i > 0 else len(points) - 1
+            px, py = pt(*points[p])
+            print(f"i={i:2}, x={x:6.3f}, y={y:6.3f}, sx={sx:3}, sy={sy:3}, c={colors[i]}")
+            draw.line([px, py, sx, sy], width=line_width, fill=colors[i])
 
     if quarters:
+        # hx = where the y=0 line intercepts the right side of the star
         hx = inner_radius / math.tan(math.radians(36))
-        draw.line([*pt(-hx, 0), *pt(hx, 0)], fill="crimson")
-        draw.line([*pt(0, -inner_radius), *pt(0, outer_radius)], fill="seagreen")
+        draw.line([*pt(-hx, 0), *pt(hx, 0)], width=line_width, fill="CornflowerBlue")
+        draw.line([*pt(0, -inner_radius), *pt(0, outer_radius)], width=line_width, fill="SeaGreen")
 
-    im = im.resize((width // multiplier, height // multiplier), Image.ANTIALIAS)
-    im.save("stars.png")    
+    # Scale down to smooth image
+    if multiplier > 1:
+        im = im.resize((image_width // multiplier, image_height // multiplier), Image.ANTIALIAS)
+
+    if filename:
+        im.save(filename)    
 
 
-draw_star(line_width=3, separate_edges=False)
+draw_star(fill_polygon=True, line_width=3)
