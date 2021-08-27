@@ -35,6 +35,11 @@ def draw_star(width=500, multiplier=2):
             draw.line([*prev, sx, sy], fill=colors[i])
         prev = (sx, sy)
 
+    # Quarters
+    hx = inner_radius / math.tan(math.radians(36))
+    draw.line([*pt(-hx, 0), *pt(hx, 0)], fill="crimson")
+    draw.line([*pt(0, -inner_radius), *pt(0, outer_radius)], fill="chartreuse")
+
     im = im.resize((width // multiplier, height // multiplier), Image.ANTIALIAS)
     im.save("stars.png")    
 
