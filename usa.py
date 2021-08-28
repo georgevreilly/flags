@@ -93,4 +93,5 @@ def draw_star(
         im.save(filename)    
 
 
-draw_star(fill_polygon=True, line_width=3)
+if __name__ == "__main__":
+    draw_star(fill_polygon=True, line_width=3)
