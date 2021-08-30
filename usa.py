@@ -65,12 +65,12 @@ def draw_star(
         draw.polygon(polygon, outline="Red", fill="White")
         # print(polygon)
     else:
+        px, py = pt(*points[-1])
         for i, (x, y) in enumerate(points):
             sx, sy = pt(x, y)
-            p = i - 1 if i > 0 else len(points) - 1
-            px, py = pt(*points[p])
             # print(f"i={i:2}, x={x:6.3f}, y={y:6.3f}, sx={sx:3}, sy={sy:3}, c={colors[i]}")
             draw.line([px, py, sx, sy], width=line_width, fill=colors[i])
+            px, py = sx, sy
 
     if quarters:
         # hx = where the y=0 line intercepts the right side of the star

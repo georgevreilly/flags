@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from typing import List, Tuple
-
 import svgwrite as sw
 
 import math
@@ -16,28 +14,26 @@ sys.path.insert(0, SCRIPT_DIR)
 from flags.usa import star_polygon, STAR_INNER_RADIUS_RATIO
 
 
-COLORS = ["Red", "Green", "Blue", "Black", "YellowGreen", "Cyan", "Magenta",
-          "Orange", "Gray", "Maroon", "Indigo", "Teal",]
-
 def svg_diagram(
         image_width: int = 500,
-        line_width: int = 0,
         filename: str = "star.svg",
     ):
 
-    image_height = image_width * 1.1
-    CX, CY = image_width // 2, image_height // 2
-    X_OFS, Y_OFS = 0, (image_height - image_width) // 2
-    outer_radius = CX
+    X_OFS, Y_OFS = 150, 180
+    image_height = image_width
+    CX, CY = X_OFS + image_width // 2, Y_OFS + image_height // 2
+    outer_radius = 0.9 * image_width // 2
     inner_radius = outer_radius * STAR_INNER_RADIUS_RATIO
 
     def pt(x, y, r=outer_radius, cx=0.0, cy=0.0):
         assert 0.0 <= x <= 1.0, str(x)
         assert 0.0 <= y <= 1.0, str(y)
-        px, py = X_OFS + round(2 * r * x), Y_OFS + round(2 * r * y)
+        px, py = CX + round(2 * r * (x-0.5)), CY + round(2 * r * (y-0.5))
         return (px, py)
 
-    dwg = sw.Drawing(filename=filename, size=(image_width, image_height), debug=True)
+    dwg = sw.Drawing(filename=filename, size=(image_width + X_OFS, image_height + Y_OFS), debug=True)
+    dwg.add(dwg.rect((10, 10), (X_OFS-10, Y_OFS-10), fill='grey'))
+    dwg.add(dwg.rect((X_OFS, Y_OFS), (image_width, image_height), fill='pink'))
 
     star = star_polygon()
     scaled_star = [pt(x, y) for x, y in star_polygon()]
