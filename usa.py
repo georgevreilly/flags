@@ -10,6 +10,7 @@ import math
 import os
 
 STAR_INNER_RADIUS_RATIO = math.sin(math.radians(18)) / math.sin(math.radians(54))
+STAR_SEGMENT_LENGTH = math.cos(math.radians(18)) - math.cos(math.radians(54))
 
 
 def star_polygon() -> List[Tuple[float, float]]:
@@ -17,6 +18,7 @@ def star_polygon() -> List[Tuple[float, float]]:
     outer_radius = 1.0 / 2.0
     inner_radius = STAR_INNER_RADIUS_RATIO * outer_radius
     points = []
+    print(f"star: outer={outer_radius:5.3f}, inner={inner_radius:5.3f}")
 
     for i in range(10):
         radius = inner_radius if i & 1 else outer_radius
@@ -25,6 +27,28 @@ def star_polygon() -> List[Tuple[float, float]]:
         x, y = (radius * math.cos(rad), radius * math.sin(rad))
         sx, sy = 0.5 + x, 0.5 - y
         points.append((sx, sy))
+        print(f"a={angle:3}, x={x:6.3f}, y={y:6.3f}, sx={sx:5.3f}, sy={sy:5.3f}")
+
+    return points
+
+
+def walk_polygon() -> list[tuple[float, float]]:
+    outer_radius = 1.0 / 2.0
+    x, y = 0, outer_radius
+    angle = 270 - 18
+    length = STAR_SEGMENT_LENGTH
+    points = []
+    print(f"walk: outer={outer_radius:5.3f}, length={length:5.3f}")
+
+    for i in range(5):
+        for adj in (-72, 144):
+            sx, sy = 0.5 + x, 0.5 - y
+            points.append((sx, sy))
+            print(f"a={angle:3}, x={x:6.3f}, y={y:6.3f}, sx={sx:5.3f}, sy={sy:5.3f}")
+            rad = math.radians(angle)
+            x += length * math.cos(rad)
+            y += length * math.sin(rad)
+            angle = (angle + adj) % 360
 
     return points
 

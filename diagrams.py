@@ -11,7 +11,7 @@ import sys
 SCRIPT_DIR = os.path.normpath(os.path.dirname(os.path.dirname(__file__)))
 sys.path.insert(0, SCRIPT_DIR)
 
-from flags.usa import star_polygon, STAR_INNER_RADIUS_RATIO
+from flags.usa import star_polygon, STAR_INNER_RADIUS_RATIO, walk_polygon
 
 
 def svg_diagram(
@@ -36,7 +36,8 @@ def svg_diagram(
     dwg.add(dwg.rect((X_OFS, Y_OFS), (image_width, image_height), fill='pink'))
 
     star = star_polygon()
-    scaled_star = [pt(x, y) for x, y in star_polygon()]
+    # star = walk_polygon()
+    scaled_star = [pt(x, y) for x, y in star]
     dwg.add(dwg.polygon(scaled_star).fill("none").stroke("red", width=2))
 
     outer_pentagon = scaled_star[0::2]
